@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import image from '../assets/Kas.jpg';
-import image3 from '../assets/Kas3.jpg';
+
 import image1 from '../assets/Raj.jpg';
+import image3 from '../assets/Kas2.jpg';
 import image2 from '../assets/Raj2.jpg';
 import { useParams, useNavigate } from "react-router-dom";
 import Header from './Header';
