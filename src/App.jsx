@@ -1,30 +1,42 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ProductDetails from "./components/ProductDetails";
-import OrderNow from "./components/OrderNow";
-import ProductEdit from "./components/ProductEdit";
-import Kas from "./components/Kas" // ✅ Import ProductEdit
-import About from './components/About';
-import Contact from './components/Contact';
-import AdminDashboard from "./pages/AdminDashboard";
+
+// Lazy-loaded components
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ProductDetails = lazy(() => import("./components/ProductDetails"));
+const OrderNow = lazy(() => import("./components/OrderNow"));
+const ProductEdit = lazy(() => import("./components/ProductEdit"));
+const Kas = lazy(() => import("./components/Kas"));
+const About = lazy(() => import("./components/About"));
+const Contact = lazy(() => import("./components/Contact"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+
+// Fallback UI with Spinner
+const Loading = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+  </div>
+);
+
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/kas" element={<Kas />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/dashboard" element={<AdminDashboard />} />
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/kas" element={<Kas />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/contact" element={<Contact />} />
-      <Route path="/product/:id" element={<ProductDetails />} />
-      <Route path="/order/:id" element={<OrderNow />} />
-      <Route path="/admin/edit/:id" element={<ProductEdit />} /> {/* ✅ Admin Edit Route */}
-    </Routes>
+        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/order/:id" element={<OrderNow />} />
+        <Route path="/admin/edit/:id" element={<ProductEdit />} />
+      </Routes>
+    </Suspense>
   );
 };
 

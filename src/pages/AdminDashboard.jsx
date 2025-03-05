@@ -4,6 +4,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth";
 import { motion } from "framer-motion";
 import { FaTrash, FaPlus, FaShareAlt } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const adminEmails = ["ratherseenu16@gmail.com", "admin@gmail.com"];
 
@@ -29,6 +30,7 @@ const AdminDashboard = () => {
     pendingAmount: "",
     date: new Date().toLocaleDateString(),
   });
+  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -52,6 +54,7 @@ const AdminDashboard = () => {
     setTotalPaid(billsData.reduce((sum, bill) => sum + Number(bill.paidAmount), 0));
     setTotalUnpaid(billsData.reduce((sum, bill) => sum + Number(bill.pendingAmount), 0));
   };
+  
 
   const addBill = async () => {
     const updatedBill = {
@@ -70,8 +73,10 @@ const AdminDashboard = () => {
       pendingAmount: "",
       date: new Date().toLocaleDateString(),
     });
+    
     fetchData();
   };
+  
 
   const deleteBill = async (id) => {
     await deleteDoc(doc(db, "bills", id));
@@ -87,89 +92,86 @@ const AdminDashboard = () => {
   if (!isAdmin) return <p className="text-center text-red-500"></p>;
 
   return (
-    <motion.div className="p-6 bg-gray-100 min-h-screen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <h2 className="text-3xl font-bold text-center text-gray-800">Ahhamnaam Constructions</h2>
+    <motion.div className="p-4 sm:p-6 bg-gray-100 min-h-screen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+  <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">Ahhamnaam Constructions</h2>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 my-6">
-        <div className="bg-blue-500 text-white p-4 rounded-lg text-center">
-          <h3 className="text-xl font-semibold">Total Customers</h3>
-          <p className="text-2xl">{bills.length}</p>
-        </div>
-        <div className="bg-green-500 text-white p-4 rounded-lg text-center">
-          <h3 className="text-xl font-semibold">Total Gained</h3>
-          <p className="text-2xl">₹{totalGained}</p>
-        </div>
-        <div className="bg-purple-500 text-white p-4 rounded-lg text-center">
-          <h3 className="text-xl font-semibold">Total Paid</h3>
-          <p className="text-2xl">₹{totalPaid}</p>
-        </div>
-        <div className="bg-red-500 text-white p-4 rounded-lg text-center">
-          <h3 className="text-xl font-semibold">Total Unpaid</h3>
-          <p className="text-2xl">₹{totalUnpaid}</p>
-        </div>
+  {/* Stats Section */}
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 my-4 sm:my-6">
+    {[
+      { title: "Total Customers", value: bills.length, color: "bg-blue-500" },
+      { title: "Total Gained", value: `₹${totalGained}`, color: "bg-green-500" },
+      { title: "Total Paid", value: `₹${totalPaid}`, color: "bg-purple-500" },
+      { title: "Total Unpaid", value: `₹${totalUnpaid}`, color: "bg-red-500" },
+    ].map((stat, index) => (
+      <div key={index} className={`${stat.color} text-white p-3 sm:p-4 rounded-lg text-center text-xs sm:text-xl`}> 
+        <h3 className="font-semibold">{stat.title}</h3>
+        <p>{stat.value}</p>
       </div>
+    ))}
+  </div>
 
-      {/* Billing System */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-2xl font-semibold mb-4">Hamaam Billing System</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {Object.keys(newBill).map((key) => (
-            key !== "pendingAmount" && key !== "date" && (
-              <input key={key} type={key.includes("Amount") ? "number" : "text"} placeholder={key} value={newBill[key]} onChange={(e) => setNewBill({...newBill, [key]: e.target.value})} className="p-2 border rounded" />
-            )
-          ))}
-          <button onClick={addBill} className="bg-blue-600 text-white p-2 rounded col-span-3"><FaPlus className="inline mr-2" />Add Bill</button>
-        </div>
+  {/* Billing System */}
+  <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+    <h3 className="text-xl sm:text-2xl font-semibold mb-4">Hamaam Billing System</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {Object.keys(newBill).map((key) => (
+        key !== "pendingAmount" && key !== "date" && (
+          <input 
+            key={key} 
+            type={key.includes("Amount") ? "number" : "text"} 
+            placeholder={key} 
+            value={newBill[key]} 
+            onChange={(e) => setNewBill({ ...newBill, [key]: e.target.value })} 
+            className="p-2 border rounded w-full"
+          />
+        )
+      ))}
+      <button onClick={addBill} className="bg-blue-600 text-white p-2 rounded col-span-1 sm:col-span-2 md:col-span-3 w-full flex items-center justify-center gap-2">
+        <FaPlus /> Add Bill
+      </button>
+    </div>
 
-        {/* Display Bills */}
-        <ul className="mt-6 space-y-4">
-  {bills.map((bill) => (
-    <li
-      key={bill.id}
-      className="bg-white shadow-lg p-4 rounded-xl border-l-4 border-blue-500 flex flex-col sm:flex-row justify-between items-center"
-    >
-      <div className="text-gray-800">
-        <p className="font-semibold text-lg">
-          <span className="text-blue-600">👤 {bill.customerName}</span>
-        </p>
-        <p className="text-sm text-gray-600">
-          🏗 <span className="font-medium">Hamaam Type:</span> {bill.hamaamType}
-        </p>
-        <p className="text-sm text-gray-600">
-          📞 <span className="font-medium">Contact:</span> {bill.contact}
-        </p>
-        <p className="text-sm text-gray-600">
-          💰 <span className="font-medium">Total:</span> ₹{bill.totalAmount} 
-        </p>
-        <p className={`text-sm font-semibold ${bill.pendingAmount > 0 ? "text-red-500" : "text-green-500"}`}>
-          ⏳ Pending: ₹{bill.pendingAmount}
-        </p>
-      </div>
-
-      <div className="flex gap-3 mt-4 sm:mt-0">
-        <button
-          onClick={() => shareBill(bill)}
-          className="bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition"
-          title="Share Bill"
+    {/* Display Bills */}
+    <ul className="mt-6 space-y-4">
+      {bills.map((bill) => (
+        <li 
+          key={bill.id} 
+          className="bg-white shadow-lg p-4 rounded-xl border-l-4 border-blue-500 flex flex-col sm:flex-row justify-between items-center gap-4"
         >
-          <FaShareAlt className="w-5 h-5" />
-        </button>
+          <div className="text-gray-800 w-full sm:w-auto text-center sm:text-left">
+            <p className="font-semibold text-lg">
+              <span className="text-blue-600">👤 {bill.customerName}</span>
+            </p>
+            <p className="text-sm text-gray-600">🏗 <span className="font-medium">Hamaam Type:</span> {bill.hamaamType}</p>
+            <p className="text-sm text-gray-600">📞 <span className="font-medium">Contact:</span> {bill.contact}</p>
+            <p className="text-sm text-gray-600">💰 <span className="font-medium">Total:</span> ₹{bill.totalAmount}</p>
+            <p className={`text-sm font-semibold ${bill.pendingAmount > 0 ? "text-red-500" : "text-green-500"}`}>
+              ⏳ Pending: ₹{bill.pendingAmount}
+            </p>
+          </div>
 
-        <button
-          onClick={() => deleteBill(bill.id)}
-          className="bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition"
-          title="Delete Bill"
-        >
-          <FaTrash className="w-5 h-5" />
-        </button>
-      </div>
-    </li>
-  ))}
-</ul>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              onClick={() => shareBill(bill)}
+              className="bg-blue-500 text-white p-2 rounded-full shadow-md hover:bg-blue-600 transition"
+              title="Share Bill"
+            >
+              <FaShareAlt className="w-5 h-5" />
+            </button>
 
-      </div>
-    </motion.div>
+            <button
+              onClick={() => deleteBill(bill.id)}
+              className="bg-red-500 text-white p-2 rounded-full shadow-md hover:bg-red-600 transition"
+              title="Delete Bill"
+            >
+              <FaTrash className="w-5 h-5" />
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</motion.div>
   );
 };
 

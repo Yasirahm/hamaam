@@ -1,6 +1,7 @@
 import React from 'react';
 import Raj1 from '../assets/Kas.jpg';
 import Footer from './Footer';
+import Feedback from './Feedback';
 
 const About = () => {
   return (
@@ -40,8 +41,10 @@ const About = () => {
         ✅ <span className="font-semibold">Traditional yet Modern</span> – Time-tested heating methods with high durability and efficiency.<br />
         
       </p>
-
+      <div className='mt-10'>
+<Feedback/>
       <Footer />
+      </div>
     </div>
   );
 };
